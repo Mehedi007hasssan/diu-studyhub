@@ -5,6 +5,10 @@ uploads/*
 data/*.db
 data/*.db-shm
 data/*.db-wal
+prisma/*.db
+prisma/*.db-journal
+prisma/*.db-shm
+prisma/*.db-wal
 .DS_Store
 *.log
 .vscode/

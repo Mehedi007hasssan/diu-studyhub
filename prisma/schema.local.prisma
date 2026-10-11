@@ -1,0 +1,100 @@
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Department {
+  id        Int       @id @default(autoincrement())
+  code      String    @unique
+  name      String
+  courses   Course[]
+  users     User[]
+
+  @@map("departments")
+}
+
+model Course {
+  id           Int         @id @default(autoincrement())
+  departmentId Int         @map("department_id")
+  code         String
+  title        String
+  createdBy    Int?        @map("created_by")
+  createdAt    DateTime    @default(now()) @map("created_at")
+
+  department   Department  @relation(fields: [departmentId], references: [id], onDelete: Cascade)
+  creator      User?       @relation("CourseCreator", fields: [createdBy], references: [id], onDelete: SetNull)
+  materials    Material[]
+
+  @@unique([departmentId, code])
+  @@map("courses")
+}
+
+model User {
+  id                Int         @id @default(autoincrement())
+  name              String
+  studentId         String?     @map("student_id")
+  email             String      @unique
+  passwordHash      String      @map("password_hash")
+  departmentId      Int?        @map("department_id")
+  role              String      @default("student")
+  createdAt         DateTime    @default(now()) @map("created_at")
+
+  department        Department? @relation(fields: [departmentId], references: [id], onDelete: SetNull)
+  coursesCreated    Course[]    @relation("CourseCreator")
+  uploadedMaterials Material[]  @relation("MaterialUploader")
+  reviewedMaterials Material[]  @relation("MaterialReviewer")
+  reports           Report[]
+
+  @@map("users")
+}
+
+model Material {
+  id           Int       @id @default(autoincrement())
+  courseId     Int       @map("course_id")
+  uploaderId   Int       @map("uploader_id")
+  title        String
+  type         String
+  exam         String?
+  term         String?
+  description  String?
+  storedName   String    @map("stored_name")
+  originalName String    @map("original_name")
+  mime         String
+  size         Int
+  sha256       String
+  status       String    @default("pending")
+  rejectReason String?   @map("reject_reason")
+  reviewedBy   Int?      @map("reviewed_by")
+  reviewedAt   DateTime? @map("reviewed_at")
+  downloads    Int       @default(0)
+  createdAt    DateTime  @default(now()) @map("created_at")
+
+  course       Course    @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  uploader     User      @relation("MaterialUploader", fields: [uploaderId], references: [id], onDelete: Cascade)
+  reviewer     User?     @relation("MaterialReviewer", fields: [reviewedBy], references: [id], onDelete: SetNull)
+  reports      Report[]
+
+  @@index([courseId, status], name: "idx_materials_course")
+  @@index([status, createdAt], name: "idx_materials_status")
+  @@index([sha256], name: "idx_materials_hash")
+  @@map("materials")
+}
+
+model Report {
+  id         Int      @id @default(autoincrement())
+  materialId Int      @map("material_id")
+  reporterId Int      @map("reporter_id")
+  reason     String
+  resolved   Int      @default(0)
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  material   Material @relation(fields: [materialId], references: [id], onDelete: Cascade)
+  reporter   User     @relation(fields: [reporterId], references: [id], onDelete: Cascade)
+
+  @@unique([materialId, reporterId])
+  @@map("reports")
+}
