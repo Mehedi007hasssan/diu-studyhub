@@ -1,0 +1,52 @@
+</main>
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="foot-grid">
+      <div class="foot-brand">
+        <a class="brand" href="/"><%- logo(34) %><span>DIU StudyHub</span></a>
+        <p><%= SITE.tagline %> Free, open-source, student-run, and peer-moderated academic hub for Daffodil International University students.</p>
+        <div class="foot-owner-card">
+          <span class="owner-chip">Platform Founder &amp; Owner</span>
+          <p class="owner-name-line">
+            <strong><%= SITE.owner %></strong>
+          </p>
+          <div class="social">
+            <a class="social-btn social-li" href="<%= SITE.linkedin %>" target="_blank" rel="noopener noreferrer" aria-label="<%= SITE.owner %> on LinkedIn" title="Mehedi Hassan Shuvo on LinkedIn"><%- icon('linkedin') %></a>
+            <a class="social-btn social-fb" href="<%= SITE.facebook %>" target="_blank" rel="noopener noreferrer" aria-label="<%= SITE.owner %> on Facebook" title="Mehedi Hassan Shuvo on Facebook"><%- icon('facebook') %></a>
+          </div>
+        </div>
+      </div>
+      <nav aria-label="Explore">
+        <h3>Explore</h3>
+        <a href="/">Home Catalog</a>
+        <a href="/search">Search Materials</a>
+        <a href="/upload">Upload Material</a>
+        <a href="/about">About DIU StudyHub</a>
+        <a href="/about#owner">Founder &amp; Owner</a>
+      </nav>
+      <nav aria-label="Community">
+        <h3>Community</h3>
+        <a href="/guidelines">Upload Guidelines</a>
+        <a href="/contact">Contact Founder</a>
+        <a href="/copyright">Report Copyright Issue</a>
+        <a href="/login">Student Sign In</a>
+      </nav>
+      <nav aria-label="Legal">
+        <h3>Legal &amp; Policy</h3>
+        <a href="/terms">Terms of Service</a>
+        <a href="/privacy">Privacy Policy</a>
+        <a href="/copyright">Copyright &amp; DMCA Takedown</a>
+      </nav>
+    </div>
+    <div class="foot-base">
+      <div class="foot-base-row">
+        <p>&copy; <%= year %> <strong>DIU StudyHub</strong>. Designed, developed, and owned by <a href="<%= SITE.linkedin %>" target="_blank" rel="noopener noreferrer" class="owner-credit"><%= SITE.owner %></a>. All rights reserved.</p>
+        <p class="foot-disclaimer">
+          Independent educational initiative. Course notes and past exam papers shared belong to their respective creators and are shared under educational fair-use principles. Not officially affiliated with Daffodil International University.
+        </p>
+      </div>
+    </div>
+  </div>
+</footer>
+</body>
+</html>

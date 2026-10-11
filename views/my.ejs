@@ -1,0 +1,32 @@
+<%- include('partials/header') %>
+
+<h1>My uploads</h1>
+<% if (justUploaded) { %><div class="notice ok">Uploaded! A moderator will review it shortly, then it will be visible to everyone.</div><% } %>
+
+<% if (!items.length) { %>
+  <div class="empty">
+    <p>You haven’t uploaded anything yet.</p>
+    <p><a class="btn" href="/upload">Upload your first file</a></p>
+  </div>
+<% } else { %>
+  <div class="list">
+    <% items.forEach(function(i){ %>
+      <a class="row" href="/m/<%= i.id %>">
+        <span class="row-main">
+          <span class="row-title"><%= i.title %></span>
+          <span class="row-meta">
+            <span class="tag tag-<%= i.type %>"><%= TYPES[i.type] %></span>
+            <span><strong><%= i.course_code %></strong></span>
+            <% if (i.status === 'rejected' && i.reject_reason) { %><span><%= i.reject_reason %></span><% } %>
+          </span>
+        </span>
+        <span class="row-side">
+          <span class="status status-<%= i.status %>"><%= i.status %></span>
+          <span><%= i.downloads %> <%= plural(i.downloads, 'download') %></span>
+        </span>
+      </a>
+    <% }) %>
+  </div>
+<% } %>
+
+<%- include('partials/footer') %>

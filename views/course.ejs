@@ -1,0 +1,37 @@
+<%- include('partials/header') %>
+
+<p class="crumbs"><a href="/">Home</a> / <a href="/d/<%= course.dept_code %>"><%= course.dept_code %></a> / <%= course.code %></p>
+<div class="page-head">
+  <div>
+    <h1><%= course.code %> · <%= course.title %></h1>
+    <p class="muted"><%= course.dept_name %> · <%= total %> approved file<%= total === 1 ? '' : 's' %></p>
+  </div>
+  <a class="btn" href="/upload?course=<%= course.id %>">Upload to this course</a>
+</div>
+
+<% if (total > 0) { %>
+<div class="filters">
+  <nav class="chips">
+    <a class="chip <%= !type ? 'on' : '' %>" href="/c/<%= course.id %>?sort=<%= sort %>">All (<%= total %>)</a>
+    <% Object.keys(TYPES).forEach(function(k){ if (counts[k]) { %>
+      <a class="chip <%= type === k ? 'on' : '' %>" href="/c/<%= course.id %>?type=<%= k %>&sort=<%= sort %>"><%= TYPES[k] %> (<%= counts[k] %>)</a>
+    <% } }) %>
+  </nav>
+  <nav class="chips">
+    <a class="chip <%= sort === 'new' ? 'on' : '' %>" href="/c/<%= course.id %>?type=<%= type %>&sort=new">Newest</a>
+    <a class="chip <%= sort === 'popular' ? 'on' : '' %>" href="/c/<%= course.id %>?type=<%= type %>&sort=popular">Most downloaded</a>
+  </nav>
+</div>
+
+<div class="list">
+  <% materials.forEach(function(m){ %><%- include('partials/material-row', { m: m, showCourse: false }) %><% }) %>
+</div>
+<% } else { %>
+  <div class="empty">
+    <h2>Nothing here yet</h2>
+    <p>No one has shared material for <strong><%= course.code %></strong> yet. If you have slides, notes or old questions, you can be the first to help your batchmates.</p>
+    <p><a class="btn" href="/upload?course=<%= course.id %>">Upload the first file</a></p>
+  </div>
+<% } %>
+
+<%- include('partials/footer') %>

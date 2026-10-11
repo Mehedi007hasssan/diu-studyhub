@@ -1,0 +1,42 @@
+<%- include('partials/header') %>
+
+<h1>Search</h1>
+<form class="search-form" action="/search" method="get">
+  <input type="search" name="q" value="<%= q %>" placeholder="Course code, title, topic, term…" aria-label="Search">
+  <select name="dept" aria-label="Department">
+    <option value="">All departments</option>
+    <% departments.forEach(function(d){ %><option value="<%= d.id %>" <%= deptId === d.id ? 'selected' : '' %>><%= d.code %></option><% }) %>
+  </select>
+  <select name="type" aria-label="Type">
+    <option value="">All types</option>
+    <% Object.keys(TYPES).forEach(function(k){ %><option value="<%= k %>" <%= type === k ? 'selected' : '' %>><%= TYPES[k] %></option><% }) %>
+  </select>
+  <button class="btn" type="submit">Search</button>
+</form>
+
+<% if (!searched) { %>
+  <p class="muted">Type a course code like <strong>CSE131</strong> or a topic like <strong>pointers</strong>.</p>
+<% } else { %>
+  <% if (courses.length) { %>
+    <h2>Courses</h2>
+    <div class="list">
+      <% courses.forEach(function(c){ %>
+        <a class="row" href="/c/<%= c.id %>"><span class="row-main"><span class="row-title"><strong><%= c.code %></strong> · <%= c.title %></span></span><span class="row-side"><span><%= c.dept_code %></span></span></a>
+      <% }) %>
+    </div>
+  <% } %>
+
+  <h2>Files <span class="muted">(<%= materials.length %><%= materials.length === 60 ? '+' : '' %>)</span></h2>
+  <% if (!materials.length) { %>
+    <div class="empty">
+      <p>No files found.</p>
+      <p>Try a shorter search, or <a href="/upload">upload the material you were looking for</a>.</p>
+    </div>
+  <% } else { %>
+    <div class="list">
+      <% materials.forEach(function(m){ %><%- include('partials/material-row', { m: m, showCourse: true }) %><% }) %>
+    </div>
+  <% } %>
+<% } %>
+
+<%- include('partials/footer') %>

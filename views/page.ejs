@@ -1,0 +1,18 @@
+<%- include('partials/header') %>
+
+<div class="doc-layout">
+  <nav class="doc-nav" aria-label="Information pages">
+    <a href="/about">About</a>
+    <% PAGES.forEach(function(p){ %>
+      <a href="/<%= p.slug %>" class="<%= p.slug === slug ? 'active' : '' %>" <%- p.slug === slug ? 'aria-current="page"' : '' %>><%= p.title %></a>
+    <% }) %>
+  </nav>
+
+  <article class="prose">
+    <h1><%= title %></h1>
+    <% if (slug !== 'contact' && slug !== 'guidelines') { %><p class="muted">Last updated <%= SITE.legalUpdated %></p><% } %>
+    <%- include('pages/' + slug) %>
+  </article>
+</div>
+
+<%- include('partials/footer') %>

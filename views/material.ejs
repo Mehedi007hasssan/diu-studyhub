@@ -1,0 +1,58 @@
+<%- include('partials/header') %>
+
+<p class="crumbs"><a href="/">Home</a> / <a href="/d/<%= m.dept_code %>"><%= m.dept_code %></a> / <a href="/c/<%= m.course_id %>"><%= m.course_code %></a></p>
+
+<% if (justUploaded) { %><div class="notice ok">Uploaded and published. Thank you for helping your batchmates!</div><% } %>
+<% if (justReported) { %><div class="notice ok">Thanks. A moderator will take a look.</div><% } %>
+<% if (m.status === 'pending') { %><div class="notice warn">This file is waiting for moderator approval. Only you and moderators can see it for now.</div><% } %>
+<% if (m.status === 'rejected') { %><div class="notice bad">This file was not approved<%= m.reject_reason ? ': ' + m.reject_reason : '.' %></div><% } %>
+<% if (openReports > 0) { %><div class="notice warn"><%= openReports %> open report<%= openReports === 1 ? '' : 's' %>. <a href="/mod">Review in moderation</a>.</div><% } %>
+
+<article class="detail">
+  <h1><%= m.title %></h1>
+  <p class="row-meta">
+    <span class="tag tag-<%= m.type %>"><%= TYPES[m.type] %></span>
+    <% if (m.exam) { %><span class="tag"><%= EXAMS[m.exam] %></span><% } %>
+    <% if (m.term) { %><span><%= m.term %></span><% } %>
+  </p>
+
+  <dl class="facts">
+    <div><dt>Course</dt><dd><a href="/c/<%= m.course_id %>"><%= m.course_code %> · <%= m.course_title %></a></dd></div>
+    <div><dt>Department</dt><dd><%= m.dept_name %></dd></div>
+    <div><dt>Uploaded by</dt><dd><%= m.uploader_name %> on <%= fmtDate(m.created_at) %></dd></div>
+    <div><dt>File</dt><dd><%= m.original_name %> · <%= fmtSize(m.size) %></dd></div>
+    <div><dt>Downloads</dt><dd><%= m.downloads %></dd></div>
+  </dl>
+
+  <% if (m.description) { %><p class="desc"><%= m.description %></p><% } %>
+
+  <div class="actions">
+    <a class="btn" href="/m/<%= m.id %>/download">Download</a>
+    <% if (inline) { %><a class="btn btn-ghost" href="/m/<%= m.id %>/view" target="_blank" rel="noopener">Preview</a><% } %>
+    <% if (canDelete) { %>
+      <form action="/m/<%= m.id %>/delete" method="post" class="inline" data-confirm="Delete this file permanently?">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+        <button class="btn btn-danger" type="submit">Delete</button>
+      </form>
+    <% } %>
+  </div>
+
+  <% if (user && !isOwner && m.status === 'approved') { %>
+    <details class="report">
+      <summary>Report a problem</summary>
+      <% if (reported) { %>
+        <p class="muted">You already reported this file.</p>
+      <% } else { %>
+        <form action="/m/<%= m.id %>/report" method="post">
+          <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+          <label>What’s wrong? (wrong course, spam, copyrighted book, inappropriate…)
+            <textarea name="reason" rows="3" maxlength="300" required></textarea>
+          </label>
+          <button class="btn btn-sm" type="submit">Send report</button>
+        </form>
+      <% } %>
+    </details>
+  <% } %>
+</article>
+
+<%- include('partials/footer') %>

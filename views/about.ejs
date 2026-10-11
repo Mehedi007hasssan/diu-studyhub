@@ -1,0 +1,135 @@
+<%- include('partials/header') %>
+
+<section class="about-hero">
+  <div class="hero-badge">
+    <span class="hero-badge-dot"></span>
+    <span>About DIU StudyHub</span>
+  </div>
+  <h1>A shared, student-powered shelf for every DIU course</h1>
+  <p class="lead">DIU StudyHub is a free academic library of lecture slides, notes, assignments and previous questions, organised cleanly by department and course, and built from what students share with each other.</p>
+</section>
+
+<section class="section split">
+  <div class="split-card">
+    <div class="card-pill">Why It Exists</div>
+    <h2>Bridging the resource gap across batches</h2>
+    <p>Good study material usually lives inside scattered WhatsApp groups, temporary drive links, and graduating students' laptops. Each new batch starts from zero, asking around for last semester's slides, lab manual solutions, or past midterms.</p>
+    <p>StudyHub preserves this institutional memory in one central repository. Open a course, find what you need immediately, and if something is missing, contribute your copy. Every upload makes the journey easier for hundreds of peers.</p>
+  </div>
+  <div class="split-card">
+    <div class="card-pill">Our Core Values</div>
+    <h2>What we stand for</h2>
+    <ul class="ticks">
+      <li><strong>100% Free &amp; Open:</strong> No subscriptions, no download points, no paywalls, and no advertisements.</li>
+      <li><strong>Moderated &amp; Verified:</strong> Every upload is reviewed by student moderators before going live.</li>
+      <li><strong>Respectful of Authors:</strong> We take copyright seriously and process valid takedown requests promptly. See our <a href="/copyright">Copyright Policy</a>.</li>
+      <li><strong>Independent Initiative:</strong> Created by students for students, built to serve Daffodil International University learners.</li>
+    </ul>
+  </div>
+</section>
+
+<section class="section" id="owner">
+  <div class="section-head">
+    <div>
+      <span class="eyebrow">Project Leadership</span>
+      <h2>Meet the Creator &amp; Owner</h2>
+    </div>
+  </div>
+  <div class="owner-showcase">
+    <div class="owner-avatar-col">
+      <div class="owner-avatar-large" aria-hidden="true">
+        <span><%= SITE.ownerInitials %></span>
+        <span class="avatar-verified" title="Verified Creator">&#10003;</span>
+      </div>
+      <span class="verified-tag"><%- icon('shield') %> Verified Founder</span>
+    </div>
+    <div class="owner-body">
+      <div class="owner-title-row">
+        <div>
+          <h3><%= SITE.owner %></h3>
+          <p class="owner-role"><%= SITE.ownerRole %> &middot; Daffodil International University</p>
+        </div>
+      </div>
+      <p class="owner-bio">
+        I built <strong>DIU StudyHub</strong> to solve a persistent challenge faced by students across every department: finding reliable study materials when exams approach. By establishing a central repository with strict peer review, we ensure that study notes and past exam papers remain organized and accessible for current and future DIU students.
+      </p>
+      <p class="owner-bio">
+        If you have questions, feature suggestions, or wish to contribute as a moderator for your department, feel free to reach out directly through my social channels.
+      </p>
+      <div class="owner-actions">
+        <a class="btn btn-sm btn-linkedin" href="<%= SITE.linkedin %>" target="_blank" rel="noopener noreferrer">
+          <%- icon('linkedin') %> Connect on LinkedIn
+        </a>
+        <a class="btn btn-sm btn-facebook" href="<%= SITE.facebook %>" target="_blank" rel="noopener noreferrer">
+          <%- icon('facebook') %> Contact on Facebook
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="copyright-banner">
+    <div class="cp-icon"><%- icon('shield') %></div>
+    <div class="cp-text">
+      <h3>Copyright Notice &amp; Academic Integrity</h3>
+      <p>
+        The DIU StudyHub design, code, and platform architecture are &copy; <%= year %> <%= SITE.owner %>. All user-uploaded notes and slides remain the intellectual property of their original creators. Commercial textbooks and copyrighted materials are prohibited under our fair use guidelines.
+      </p>
+      <div class="cp-links">
+        <a href="/copyright">View Full Copyright &amp; Takedown Policy &rarr;</a>
+        <a href="/terms">Terms of Service &rarr;</a>
+        <a href="/privacy">Privacy Policy &rarr;</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="section-head">
+    <div>
+      <span class="eyebrow">Got Questions?</span>
+      <h2>Frequently Asked Questions</h2>
+    </div>
+  </div>
+  <div class="faq">
+    <details>
+      <summary>Is DIU StudyHub an official DIU website?</summary>
+      <p>No. It is an independent, non-profit community project built and maintained by <%= SITE.owner %>. It is not officially operated by, endorsed by, or affiliated with Daffodil International University administration.</p>
+    </details>
+    <details>
+      <summary>Who can upload study materials?</summary>
+      <p>Any registered DIU student. Once you create an account with your department information, you can upload PDFs, slides, assignments, and questions. If your specific course is not yet listed, you can create it dynamically during upload!</p>
+    </details>
+    <details>
+      <summary>Why does an upload status show "pending"?</summary>
+      <p>To keep the platform high-quality and spam-free, student uploads go through a quick review queue where moderators check course code correctness and verify file integrity before it appears publicly.</p>
+    </details>
+    <details>
+      <summary>What file types and sizes are supported?</summary>
+      <p>We accept PDF, PPT/PPTX, DOC/DOCX, XLS/XLSX, PNG/JPG, and ZIP archives up to 25 MB per file. The server verifies real magic-byte file headers for maximum security.</p>
+    </details>
+    <details>
+      <summary>How can I remove a file I previously uploaded?</summary>
+      <p>Go to the "My Uploads" page from the user menu, find the file, and click Delete. The file and its database record are removed immediately.</p>
+    </details>
+    <details>
+      <summary>How do copyright holders request a takedown?</summary>
+      <p>If you are a copyright owner or educator wishing to remove specific material, visit our <a href="/copyright">Copyright &amp; Takedown</a> page to submit an immediate removal request.</p>
+    </details>
+    <details>
+      <summary>Can I apply to become a moderator for my department?</summary>
+      <p>Yes! We welcome active, responsible students. Reach out via the <a href="/contact">Contact</a> page or message <%= SITE.owner %> on LinkedIn/Facebook with your department and semester.</p>
+    </details>
+  </div>
+</section>
+
+<section class="cta">
+  <div class="cta-copy">
+    <h2>Make the next semester easier for everyone</h2>
+    <p>Upload a course slide or midterm question today to help your juniors.</p>
+  </div>
+  <a class="btn btn-gold btn-lg" href="/upload"><%- icon('upload') %> Upload Material</a>
+</section>
+
+<%- include('partials/footer') %>

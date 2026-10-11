@@ -1,0 +1,66 @@
+<%- include('partials/header') %>
+
+<h1>Moderation</h1>
+
+<h2>Waiting for review <span class="muted">(<%= pending.length %>)</span></h2>
+<% if (!pending.length) { %>
+  <div class="empty"><p>The queue is empty. 🎉</p></div>
+<% } %>
+<% pending.forEach(function(p){ %>
+  <article class="modcard">
+    <div class="modcard-head">
+      <div>
+        <strong><%= p.title %></strong>
+        <div class="row-meta">
+          <span class="tag tag-<%= p.type %>"><%= TYPES[p.type] %></span>
+          <span><strong><%= p.course_code %></strong> · <%= p.course_title %> (<%= p.dept_code %>)</span>
+          <span>by <%= p.uploader %></span>
+          <span><%= p.original_name %> · <%= fmtSize(p.size) %></span>
+        </div>
+        <% if (p.description) { %><p class="desc"><%= p.description %></p><% } %>
+      </div>
+      <div class="actions">
+        <a class="btn btn-ghost btn-sm" href="/m/<%= p.id %>/download">Download to check</a>
+        <a class="btn btn-ghost btn-sm" href="/m/<%= p.id %>">Open</a>
+      </div>
+    </div>
+    <div class="modcard-actions">
+      <form action="/mod/m/<%= p.id %>/approve" method="post" class="inline">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+        <button class="btn btn-sm" type="submit">Approve</button>
+      </form>
+      <form action="/mod/m/<%= p.id %>/reject" method="post" class="inline reject">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+        <input type="text" name="reason" maxlength="200" placeholder="Reason (shown to uploader)">
+        <button class="btn btn-danger btn-sm" type="submit">Reject</button>
+      </form>
+    </div>
+  </article>
+<% }) %>
+
+<h2>Reports <span class="muted">(<%= reports.length %>)</span></h2>
+<% if (!reports.length) { %>
+  <div class="empty"><p>No open reports.</p></div>
+<% } %>
+<% reports.forEach(function(r){ %>
+  <article class="modcard">
+    <div class="modcard-head">
+      <div>
+        <strong><a href="/m/<%= r.material_id %>"><%= r.title %></a></strong> <span class="muted">(<%= r.course_code %>)</span>
+        <p class="desc">“<%= r.reason %>” <span class="muted">— <%= r.reporter %>, <%= fmtDate(r.created_at) %></span></p>
+      </div>
+    </div>
+    <div class="modcard-actions">
+      <form action="/mod/reports/<%= r.id %>/dismiss" method="post" class="inline">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+        <button class="btn btn-ghost btn-sm" type="submit">Dismiss report</button>
+      </form>
+      <form action="/mod/m/<%= r.material_id %>/remove" method="post" class="inline" data-confirm="Remove this file permanently?">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+        <button class="btn btn-danger btn-sm" type="submit">Remove file</button>
+      </form>
+    </div>
+  </article>
+<% }) %>
+
+<%- include('partials/footer') %>

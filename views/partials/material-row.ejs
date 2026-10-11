@@ -1,0 +1,15 @@
+<a class="row" href="/m/<%= m.id %>">
+  <span class="row-main">
+    <span class="row-title"><%= m.title %></span>
+    <span class="row-meta">
+      <span class="tag tag-<%= m.type %>"><%= TYPES[m.type] || m.type %></span>
+      <% if (m.exam) { %><span class="tag"><%= EXAM_LABELS[m.exam] %></span><% } %>
+      <% if (m.term) { %><span><%= m.term %></span><% } %>
+      <% if (typeof showCourse !== 'undefined' && showCourse) { %><span><strong><%= m.course_code %></strong> · <%= m.course_title %></span><% } %>
+    </span>
+  </span>
+  <span class="row-side">
+    <span><%= m.downloads %> <%= plural(m.downloads, 'download') %></span>
+    <span><%= fmtDate(m.created_at) %></span>
+  </span>
+</a>

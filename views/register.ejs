@@ -1,0 +1,39 @@
+<%- include('partials/header') %>
+
+<div class="auth">
+  <h1>Create your account</h1>
+  <% if (domains.length) { %><p class="muted">Use your university email (<%= domains.map(function(d){ return '@' + d; }).join(' or ') %>).</p><% } %>
+  <% if (errors.length) { %>
+    <div class="notice bad"><ul><% errors.forEach(function(e){ %><li><%= e %></li><% }) %></ul></div>
+  <% } %>
+  <form class="form" action="/register" method="post">
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+    <label>Full name
+      <input type="text" name="name" required maxlength="80" autocomplete="name" value="<%= form.name || '' %>">
+    </label>
+    <label><span>Student ID <span class="muted">(optional)</span></span>
+      <input type="text" name="student_id" maxlength="30" value="<%= form.student_id || '' %>">
+    </label>
+    <label>Email
+      <input type="email" name="email" required autocomplete="email" value="<%= form.email || '' %>">
+    </label>
+    <label>Department
+      <select name="department_id" required>
+        <option value="">Select department…</option>
+        <% departments.forEach(function(d){ %>
+          <option value="<%= d.id %>" <%= form.department_id == d.id ? 'selected' : '' %>><%= d.code %> — <%= d.name %></option>
+        <% }) %>
+      </select>
+    </label>
+    <label><span>Password <span class="muted">(min 8 characters)</span></span>
+      <input type="password" name="password" required minlength="8" maxlength="72" autocomplete="new-password">
+    </label>
+    <label>Confirm password
+      <input type="password" name="password2" required minlength="8" maxlength="72" autocomplete="new-password">
+    </label>
+    <button class="btn" type="submit">Sign up</button>
+  </form>
+  <p class="muted">Already have an account? <a href="/login">Log in</a>.</p>
+</div>
+
+<%- include('partials/footer') %>

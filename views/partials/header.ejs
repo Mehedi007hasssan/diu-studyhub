@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title><%= typeof title !== 'undefined' && title !== 'DIU StudyHub' ? title + ' | DIU StudyHub' : 'DIU StudyHub: course materials shared by DIU students' %></title>
+  <meta name="description" content="Find and share lecture slides, notes, assignments and previous questions for every DIU department and course.">
+  <meta name="theme-color" content="#f8fafc">
+  <meta property="og:title" content="DIU StudyHub">
+  <meta property="og:description" content="Course materials shared by DIU students, for DIU students.">
+  <meta property="og:type" content="website">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&display=swap">
+  <link rel="stylesheet" href="/style.css">
+  <script src="/theme.js"></script>
+  <script src="/app.js" defer></script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="site-header">
+  <div class="wrap bar">
+    <a class="brand" href="/" aria-label="DIU StudyHub home"><%- logo(30) %><span>DIU StudyHub</span></a>
+
+    <button class="nav-toggle" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="nav">
+      <span class="when-closed"><%- icon('menu') %></span><span class="when-open"><%- icon('close') %></span>
+    </button>
+
+    <div class="nav" id="nav">
+      <form class="nav-search" action="/search" method="get" role="search">
+        <%- icon('search') %>
+        <input type="search" name="q" placeholder="Search courses and files" aria-label="Search courses and files">
+      </form>
+
+      <nav class="links" aria-label="Main">
+        <a href="/about" class="<%= path === '/about' ? 'active' : '' %>">About</a>
+        <a href="/guidelines" class="<%= path === '/guidelines' ? 'active' : '' %>">Guidelines</a>
+      </nav>
+
+      <button class="theme-switch" type="button" data-theme-toggle aria-pressed="false" aria-label="Switch between day and night mode" title="Day / night mode">
+        <span class="ts-icon ts-sun"><%- icon('sun') %></span>
+        <span class="ts-icon ts-moon"><%- icon('moon') %></span>
+        <span class="ts-knob"></span>
+      </button>
+
+      <a href="/upload" class="btn btn-sm btn-upload"><%- icon('upload') %>Upload</a>
+
+      <% if (user) { %>
+        <details class="usermenu">
+          <summary aria-label="Account menu">
+            <span class="avatar"><%= user.name.trim().charAt(0).toUpperCase() %></span>
+            <span class="uname"><%= user.name.split(' ')[0] %></span>
+          </summary>
+          <div class="menu">
+            <div class="menu-head">
+              <strong><%= user.name %></strong>
+              <% if (user.role !== 'student') { %><span class="badge badge-<%= user.role %>"><%= user.role %></span><% } %>
+            </div>
+            <a href="/my">My uploads</a>
+            <% if (isMod(user)) { %><a href="/mod">Moderation</a><% } %>
+            <% if (user.role === 'admin') { %><a href="/admin">Admin</a><% } %>
+            <form action="/logout" method="post">
+              <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+              <button type="submit">Log out</button>
+            </form>
+          </div>
+        </details>
+      <% } else { %>
+        <a href="/login" class="login-link">Log in</a>
+        <a href="/register" class="btn btn-sm btn-ghost">Sign up</a>
+      <% } %>
+    </div>
+  </div>
+</header>
+<main class="wrap" id="main">

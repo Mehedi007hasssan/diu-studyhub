@@ -1,0 +1,87 @@
+<%- include('partials/header') %>
+
+<h1>Upload material</h1>
+<p class="muted">Share slides, notes, assignments or previous questions. New uploads are reviewed by moderators before they appear publicly.</p>
+
+<% if (errors.length) { %>
+  <div class="notice bad"><ul><% errors.forEach(function(e){ %><li><%= e %></li><% }) %></ul></div>
+<% } %>
+
+<form class="form" action="/upload" method="post" enctype="multipart/form-data" data-max-mb="<%= MAX_MB %>">
+  <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
+  <fieldset>
+    <legend>1. Which course?</legend>
+    <label>Department
+      <select name="department_id" id="department_id">
+        <option value="">Select department…</option>
+        <% departments.forEach(function(d){ %>
+          <option value="<%= d.id %>" <%= form.department_id == d.id ? 'selected' : '' %>><%= d.code %> — <%= d.name %></option>
+        <% }) %>
+      </select>
+    </label>
+    <label>Course
+      <select name="course_id" id="course_id">
+        <option value="">Select course…</option>
+        <% courses.forEach(function(c){ %>
+          <option value="<%= c.id %>" data-dept="<%= c.department_id %>" <%= form.course_id == c.id ? 'selected' : '' %>><%= c.code %> — <%= c.title %></option>
+        <% }) %>
+      </select>
+    </label>
+    <details <%= (form.new_course_code || form.new_course_title) ? 'open' : '' %>>
+      <summary>My course isn’t listed</summary>
+      <p class="muted">Pick the department above, then add the course here and leave “Course” empty.</p>
+      <div class="two">
+        <label>Course code
+          <input type="text" name="new_course_code" maxlength="14" placeholder="CSE131" value="<%= form.new_course_code || '' %>">
+        </label>
+        <label>Course title
+          <input type="text" name="new_course_title" maxlength="100" placeholder="Data Structures" value="<%= form.new_course_title || '' %>">
+        </label>
+      </div>
+    </details>
+  </fieldset>
+
+  <fieldset>
+    <legend>2. What are you sharing?</legend>
+    <label>Title
+      <input type="text" name="title" maxlength="120" required placeholder="e.g. Chapter 3 – Linked Lists (slides)" value="<%= form.title || '' %>">
+    </label>
+    <div class="two">
+      <label>Type
+        <select name="type" id="type" required>
+          <option value="">Select type…</option>
+          <% Object.keys(TYPES).forEach(function(k){ %>
+            <option value="<%= k %>" <%= form.type === k ? 'selected' : '' %>><%= TYPES[k] %></option>
+          <% }) %>
+        </select>
+      </label>
+      <label><span>Semester / term <span class="muted">(optional)</span></span>
+        <input type="text" name="term" maxlength="30" placeholder="Spring 2026" value="<%= form.term || '' %>">
+      </label>
+    </div>
+    <label id="exam-field">Exam <span class="muted">(for previous questions)</span>
+      <select name="exam">
+        <option value="">—</option>
+        <% Object.keys(EXAMS).forEach(function(k){ %>
+          <option value="<%= k %>" <%= form.exam === k ? 'selected' : '' %>><%= EXAMS[k] %></option>
+        <% }) %>
+      </select>
+    </label>
+    <label><span>Description <span class="muted">(optional)</span></span>
+      <textarea name="description" rows="3" maxlength="500" placeholder="Teacher name, topics covered, anything that helps others"><%= form.description || '' %></textarea>
+    </label>
+  </fieldset>
+
+  <fieldset>
+    <legend>3. The file</legend>
+    <label>Choose file (PDF, PPT/PPTX, DOC/DOCX, XLS/XLSX, PNG/JPG, ZIP · max <%= MAX_MB %> MB)
+      <input type="file" name="file" id="file" required accept=".pdf,.ppt,.pptx,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg,.zip">
+    </label>
+    <p class="muted">Only upload material you created or are allowed to share. Please don’t upload full copyrighted textbooks.</p>
+  </fieldset>
+
+  <button class="btn" type="submit">Upload</button>
+</form>
+
+<%- include('partials/footer') %>

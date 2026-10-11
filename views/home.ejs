@@ -1,0 +1,217 @@
+<%- include('partials/header') %>
+
+<% var popular = departments.slice().sort(function(a, b){ return b.materials - a.materials || b.courses - a.courses; }).slice(0, 6); %>
+
+<section class="hero">
+  <div class="hero-copy">
+    <div class="hero-badge">
+      <span class="hero-badge-dot"></span>
+      <span>Daffodil International University &middot; Student Academic Vault</span>
+    </div>
+
+    <h1>Find your course materials. Share yours.</h1>
+    <p class="lead">Lecture slides, notes, assignments and previous questions for every DIU department, uploaded by students who took the course before you.</p>
+
+    <form class="hero-search" action="/search" method="get" role="search">
+      <%- icon('search') %>
+      <input id="hero-q" type="search" name="q" placeholder='Try "CSE131"' aria-label="Search courses and files" autocomplete="off">
+      <button class="btn" type="submit">Search</button>
+    </form>
+
+    <p class="pills" aria-label="Popular departments">
+      <% popular.forEach(function(d){ %><a class="pill <%= hueClass(d.code) %>" href="/d/<%= d.code %>"><%= d.code %></a><% }) %>
+      <a class="pill pill-plain" href="#departments">All departments</a>
+    </p>
+
+    <div class="statline">
+      <div class="stat-item">
+        <span class="stat-number"><%= stats.materials %></span>
+        <span class="stat-label"><%= plural(stats.materials, 'file') %></span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-number"><%= stats.courses %></span>
+        <span class="stat-label"><%= plural(stats.courses, 'course') %></span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-number"><%= stats.students %></span>
+        <span class="stat-label"><%= plural(stats.students, 'student') %></span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-number"><%= stats.downloads %></span>
+        <span class="stat-label"><%= plural(stats.downloads, 'download') %></span>
+      </div>
+    </div>
+  </div>
+
+  <aside class="panel" aria-labelledby="fresh-title">
+    <div class="panel-head">
+      <h2 id="fresh-title">Newly added</h2>
+      <span class="live"><i></i>Live Feed</span>
+    </div>
+    <% if (recent.length) { %>
+      <% recent.slice(0, 5).forEach(function(m){ %>
+        <a class="panel-row" href="/m/<%= m.id %>">
+          <span class="panel-code <%= hueClass(m.dept_code) %>"><%= m.course_code %></span>
+          <span class="panel-main">
+            <span class="panel-title"><%= m.title %></span>
+            <span class="panel-meta"><%= TYPES[m.type] %> &middot; <%= fmtDate(m.created_at) %></span>
+          </span>
+        </a>
+      <% }) %>
+    <% } else { %>
+      <div class="panel-empty">
+        <p><strong>Nothing has been shared yet.</strong></p>
+        <p>Upload the first file and it will show up here once a moderator approves it.</p>
+        <a class="btn btn-sm btn-gold" href="/upload">Upload a file</a>
+      </div>
+    <% } %>
+  </aside>
+</section>
+
+<section id="departments" class="section">
+  <div class="section-head">
+    <div>
+      <span class="eyebrow">DIU Academic Catalog</span>
+      <h2>Browse by department</h2>
+    </div>
+    <p class="muted">Pick your department, then browse courses.</p>
+  </div>
+  <div class="tiles">
+    <% departments.forEach(function(d){ %>
+      <a class="tile <%= hueClass(d.code) %>" href="/d/<%= d.code %>">
+        <div class="tile-top">
+          <span class="tile-code"><%= d.code %></span>
+          <span class="tile-arrow">&rarr;</span>
+        </div>
+        <span class="tile-name"><%= d.name %></span>
+        <span class="tile-meta"><%= d.courses %> <%= plural(d.courses, 'course') %> &middot; <%= d.materials %> <%= plural(d.materials, 'file') %></span>
+      </a>
+    <% }) %>
+  </div>
+</section>
+
+<section class="section">
+  <div class="section-head">
+    <div>
+      <span class="eyebrow">Simple Workflow</span>
+      <h2>How it works</h2>
+    </div>
+  </div>
+  <ol class="flow">
+    <li>
+      <span class="flow-n">1</span>
+      <h3>Open your course</h3>
+      <p>Choose your department and course. Filter by slides, notes, assignments or previous questions.</p>
+    </li>
+    <li>
+      <span class="flow-n">2</span>
+      <h3>Download what you need</h3>
+      <p>Preview PDFs and images in the browser or download them instantly. 100% free with no ads.</p>
+    </li>
+    <li>
+      <span class="flow-n">3</span>
+      <h3>Upload what you have</h3>
+      <p>Missing a file? Share yours. A moderator verifies it, and the entire student community benefits.</p>
+    </li>
+  </ol>
+</section>
+
+<section class="section features">
+  <div class="feature-card">
+    <div class="feature-icon"><%- icon('shield') %></div>
+    <h3>Peer-Reviewed &amp; Safe</h3>
+    <p>Moderators review every student submission before it is published to ensure quality, accurate course codes, and safe downloads.</p>
+  </div>
+  <div class="feature-card">
+    <div class="feature-icon"><%- icon('users') %></div>
+    <h3>By Students, For Students</h3>
+    <p>Every piece of material comes directly from students who sat the same examinations, matching DIU course syllabi accurately.</p>
+  </div>
+  <div class="feature-card">
+    <div class="feature-icon"><%- icon('heart') %></div>
+    <h3>Open &amp; Non-Profit</h3>
+    <p>CSE to Law, Pharmacy to BBA: dedicated folders for every DIU department. Free access without paywalls or subscriptions.</p>
+  </div>
+</section>
+
+<!-- About Section & Founder Spotlight -->
+<section id="about" class="section home-about">
+  <div class="section-head">
+    <div>
+      <span class="eyebrow">About DIU StudyHub</span>
+      <h2>Behind the Platform &amp; Initiative</h2>
+    </div>
+    <a class="btn btn-ghost btn-sm" href="/about">Full About &amp; FAQ &rarr;</a>
+  </div>
+
+  <div class="home-about-grid">
+    <div class="about-card story-card">
+      <div class="card-pill">Our Mission</div>
+      <h3>Solving the semester-start scramble for every DIU student</h3>
+      <p>
+        Every new semester at Daffodil International University, students spend days asking around for lecture slides, course outlines, and past mid/final exam papers scattered across private chats and fading drives.
+      </p>
+      <p>
+        <strong>DIU StudyHub</strong> was created to eliminate that friction. A clean, moderated, student-powered digital library where seniors pay it forward, and fresh batches get immediate access to everything they need to excel.
+      </p>
+      <div class="trust-pills">
+        <span class="trust-pill"><%- icon('shield') %> Safe &amp; Verified</span>
+        <span class="trust-pill"><%- icon('heart') %> 100% Free Forever</span>
+        <span class="trust-pill"><%- icon('users') %> Student Community</span>
+      </div>
+    </div>
+
+    <div class="about-card owner-card">
+      <div class="owner-card-top">
+        <span class="card-pill gold">Founder &amp; Platform Owner</span>
+        <div class="owner-avatar-wrap">
+          <div class="owner-avatar" aria-hidden="true"><%= SITE.ownerInitials %></div>
+          <span class="verified-badge" title="Verified Creator">&#10003;</span>
+        </div>
+      </div>
+      <div class="owner-info">
+        <h3><%= SITE.owner %></h3>
+        <p class="owner-subtitle"><%= SITE.ownerRole %> &middot; Daffodil International University</p>
+      </div>
+      <blockquote class="owner-quote">
+        &ldquo;I designed and developed DIU StudyHub to give all DIU departments a single, organized place to share knowledge. When students help students, everyone succeeds.&rdquo;
+      </blockquote>
+      <div class="owner-actions">
+        <a class="btn btn-sm btn-linkedin" href="<%= SITE.linkedin %>" target="_blank" rel="noopener noreferrer">
+          <%- icon('linkedin') %> LinkedIn Profile
+        </a>
+        <a class="btn btn-sm btn-facebook" href="<%= SITE.facebook %>" target="_blank" rel="noopener noreferrer">
+          <%- icon('facebook') %> Facebook Profile
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Academic Integrity & Copyright Assurance -->
+<section class="section">
+  <div class="copyright-banner">
+    <div class="cp-icon"><%- icon('shield') %></div>
+    <div class="cp-text">
+      <h3>Academic Integrity &amp; Copyright Policy</h3>
+      <p>
+        DIU StudyHub operates strictly for non-commercial, educational study sharing. We respect the intellectual property of instructors, publishers, and students. Commercial copyrighted textbooks and proprietary exam leakages are strictly prohibited and actively removed.
+      </p>
+      <div class="cp-links">
+        <a href="/copyright">Notice &amp; Takedown Procedure &rarr;</a>
+        <a href="/guidelines">Upload Guidelines &rarr;</a>
+        <a href="/terms">Terms of Use &rarr;</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="cta">
+  <div class="cta-copy">
+    <h2>Have notes from last semester?</h2>
+    <p>Sharing them takes two minutes and saves junior students countless hours.</p>
+  </div>
+  <a class="btn btn-gold btn-lg" href="/upload"><%- icon('upload') %> Upload Material</a>
+</section>
+
+<%- include('partials/footer') %>

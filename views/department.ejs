@@ -1,0 +1,30 @@
+<%- include('partials/header') %>
+
+<p class="crumbs"><a href="/">Home</a> / <%= dept.code %></p>
+<h1><%= dept.name %></h1>
+
+<form method="get" class="inline-search">
+  <input type="search" name="q" value="<%= q %>" placeholder="Filter courses in <%= dept.code %>…" aria-label="Filter courses">
+  <button class="btn btn-sm" type="submit">Filter</button>
+</form>
+
+<% if (!courses.length) { %>
+  <div class="empty">
+    <p>No courses<%= q ? ' match “' + q + '”' : ' yet' %>.</p>
+    <p><a class="btn" href="/upload">Upload and add your course</a></p>
+  </div>
+<% } else { %>
+  <div class="list">
+    <% courses.forEach(function(c){ %>
+      <a class="row" href="/c/<%= c.id %>">
+        <span class="row-main">
+          <span class="row-title"><strong><%= c.code %></strong> · <%= c.title %></span>
+        </span>
+        <span class="row-side"><span><%= c.materials %> <%= plural(c.materials, 'file') %></span></span>
+      </a>
+    <% }) %>
+  </div>
+  <p class="muted">Don’t see your course? <a href="/upload">Add it while uploading</a>.</p>
+<% } %>
+
+<%- include('partials/footer') %>
