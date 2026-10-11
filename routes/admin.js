@@ -1,111 +1,165 @@
 const express = require('express');
-const db = require('../db');
+const prisma = require('../db');
 const { requireAdmin } = require('../lib/auth');
 
 const router = express.Router();
 router.use(requireAdmin);
 
-const escapeLike = (s) => s.replace(/[\\%_]/g, (m) => '\\' + m);
-
-// One-time message shown after a redirect (kept in the signed session cookie).
 const flash = (req, msg, ok = true) => {
   req.session.flash = { msg, ok };
 };
 
-router.get('/', (req, res) => {
-  const q = (req.query.q || '').trim().slice(0, 80);
-
-  const stats = db
-    .prepare(
-      `SELECT
-         (SELECT COUNT(*) FROM users) AS users,
-         (SELECT COUNT(*) FROM materials WHERE status = 'approved') AS approved,
-         (SELECT COUNT(*) FROM materials WHERE status = 'pending') AS pending,
-         (SELECT COUNT(*) FROM reports WHERE resolved = 0) AS reports,
-         (SELECT COUNT(*) FROM courses) AS courses,
-         (SELECT COALESCE(SUM(downloads), 0) FROM materials) AS downloads`
-    )
-    .get();
-
-  let sql = `SELECT u.id, u.name, u.email, u.student_id, u.role, u.created_at, d.code AS dept
-             FROM users u LEFT JOIN departments d ON d.id = u.department_id`;
-  const params = [];
-  if (q) {
-    const like = '%' + escapeLike(q) + '%';
-    sql += ` WHERE u.name LIKE ? ESCAPE '\\' OR u.email LIKE ? ESCAPE '\\' OR u.student_id LIKE ? ESCAPE '\\'`;
-    params.push(like, like, like);
-  }
-  sql += ' ORDER BY u.created_at DESC, u.id DESC LIMIT 100';
-  const users = db.prepare(sql).all(...params);
-
-  const departments = db.prepare('SELECT id, code, name FROM departments ORDER BY name').all();
-
-  const f = req.session.flash || null;
-  req.session.flash = null;
-
-  res.render('admin', {
-    title: 'Admin',
-    stats,
-    users,
-    q,
-    departments,
-    msg: f ? f.msg : null,
-    msgOk: f ? f.ok : true,
-  });
-});
-
-router.post('/users/:id/role', (req, res) => {
-  const role = req.body.role;
-  if (!['student', 'moderator', 'admin'].includes(role)) {
-    flash(req, 'Choose a valid role.', false);
-  } else if (Number(req.params.id) === req.user.id) {
-    flash(req, 'You cannot change your own role.', false);
-  } else {
-    const r = db.prepare('UPDATE users SET role = ? WHERE id = ?').run(role, req.params.id);
-    if (r.changes) flash(req, 'Role updated.');
-    else flash(req, 'That person was not found.', false);
-  }
-  res.redirect('/admin');
-});
-
-router.post('/departments', (req, res) => {
-  const code = (req.body.code || '').trim().toUpperCase().replace(/\s+/g, '');
-  const name = (req.body.name || '').trim();
-  if (!/^[A-Z0-9-]{2,10}$/.test(code) || name.length < 3 || name.length > 80) {
-    flash(req, 'Department code must be 2-10 letters or numbers, and the name 3-80 characters.', false);
-    return res.redirect('/admin');
-  }
+router.get('/', async (req, res, next) => {
   try {
-    db.prepare('INSERT INTO departments (code, name) VALUES (?, ?)').run(code, name);
-    flash(req, `Department ${code} added.`);
-  } catch {
-    flash(req, `A department with code ${code} already exists.`, false);
+    const q = (req.query.q || '').trim().slice(0, 80);
+
+    const [
+      usersCount,
+      approvedCount,
+      pendingCount,
+      reportsCount,
+      coursesCount,
+      downloadsSum,
+    ] = await Promise.all([
+      prisma.user.count(),
+      prisma.material.count({ where: { status: 'approved' } }),
+      prisma.material.count({ where: { status: 'pending' } }),
+      prisma.report.count({ where: { resolved: 0 } }),
+      prisma.course.count(),
+      prisma.material.aggregate({ _sum: { downloads: true } }),
+    ]);
+
+    const stats = {
+      users: usersCount,
+      approved: approvedCount,
+      pending: pendingCount,
+      reports: reportsCount,
+      courses: coursesCount,
+      downloads: downloadsSum._sum.downloads || 0,
+    };
+
+    const userWhere = {};
+    if (q) {
+      userWhere.OR = [
+        { name: { contains: q, mode: 'insensitive' } },
+        { email: { contains: q, mode: 'insensitive' } },
+        { studentId: { contains: q, mode: 'insensitive' } },
+      ];
+    }
+
+    const rawUsers = await prisma.user.findMany({
+      where: userWhere,
+      orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
+      take: 100,
+      include: { department: { select: { code: true } } },
+    });
+
+    const users = rawUsers.map((u) => ({
+      id: u.id,
+      name: u.name,
+      email: u.email,
+      student_id: u.studentId,
+      role: u.role,
+      created_at: u.createdAt.toISOString(),
+      dept: u.department ? u.department.code : null,
+    }));
+
+    const departments = await prisma.department.findMany({
+      orderBy: { name: 'asc' },
+      select: { id: true, code: true, name: true },
+    });
+
+    const f = req.session.flash || null;
+    req.session.flash = null;
+
+    res.render('admin', {
+      title: 'Admin',
+      stats,
+      users,
+      q,
+      departments,
+      msg: f ? f.msg : null,
+      msgOk: f ? f.ok : true,
+    });
+  } catch (err) {
+    next(err);
   }
-  res.redirect('/admin');
 });
 
-router.post('/courses', (req, res) => {
-  const deptId = parseInt(req.body.department_id, 10);
-  const code = (req.body.code || '').trim().toUpperCase().replace(/\s+/g, '');
-  const title = (req.body.title || '').trim();
-  if (!deptId || !db.prepare('SELECT 1 FROM departments WHERE id = ?').get(deptId)) {
-    flash(req, 'Choose a department.', false);
-  } else if (!/^[A-Z0-9-]{2,12}$/.test(code) || title.length < 3 || title.length > 100) {
-    flash(req, 'Course code must be 2-12 letters or numbers, and the title 3-100 characters.', false);
-  } else {
-    try {
-      db.prepare('INSERT INTO courses (department_id, code, title, created_by) VALUES (?, ?, ?, ?)').run(
-        deptId,
-        code,
-        title,
-        req.user.id
-      );
-      flash(req, `Course ${code} added.`);
-    } catch {
-      flash(req, `${code} already exists in that department.`, false);
+router.post('/users/:id/role', async (req, res, next) => {
+  try {
+    const userId = parseInt(req.params.id, 10);
+    const role = req.body.role;
+
+    if (!['student', 'moderator', 'admin'].includes(role)) {
+      flash(req, 'Choose a valid role.', false);
+    } else if (userId === req.user.id) {
+      flash(req, 'You cannot change your own role.', false);
+    } else {
+      const updated = await prisma.user.updateMany({
+        where: { id: userId },
+        data: { role },
+      });
+      if (updated.count > 0) flash(req, 'Role updated.');
+      else flash(req, 'That person was not found.', false);
     }
+    res.redirect('/admin');
+  } catch (err) {
+    next(err);
   }
-  res.redirect('/admin');
+});
+
+router.post('/departments', async (req, res, next) => {
+  try {
+    const code = (req.body.code || '').trim().toUpperCase().replace(/\s+/g, '');
+    const name = (req.body.name || '').trim();
+
+    if (!/^[A-Z0-9-]{2,10}$/.test(code) || name.length < 3 || name.length > 80) {
+      flash(req, 'Department code must be 2-10 letters or numbers, and the name 3-80 characters.', false);
+      return res.redirect('/admin');
+    }
+
+    try {
+      await prisma.department.create({ data: { code, name } });
+      flash(req, `Department ${code} added.`);
+    } catch {
+      flash(req, `A department with code ${code} already exists.`, false);
+    }
+    res.redirect('/admin');
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.post('/courses', async (req, res, next) => {
+  try {
+    const deptId = parseInt(req.body.department_id, 10);
+    const code = (req.body.code || '').trim().toUpperCase().replace(/\s+/g, '');
+    const title = (req.body.title || '').trim();
+
+    if (!deptId || !(await prisma.department.findUnique({ where: { id: deptId } }))) {
+      flash(req, 'Choose a department.', false);
+    } else if (!/^[A-Z0-9-]{2,12}$/.test(code) || title.length < 3 || title.length > 100) {
+      flash(req, 'Course code must be 2-12 letters or numbers, and the title 3-100 characters.', false);
+    } else {
+      try {
+        await prisma.course.create({
+          data: {
+            departmentId: deptId,
+            code,
+            title,
+            createdBy: req.user.id,
+          },
+        });
+        flash(req, `Course ${code} added.`);
+      } catch {
+        flash(req, `${code} already exists in that department.`, false);
+      }
+    }
+    res.redirect('/admin');
+  } catch (err) {
+    next(err);
+  }
 });
 
 module.exports = router;
