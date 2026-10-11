@@ -9,7 +9,7 @@
     "dev": "node --watch server.js",
     "preview": "node server.js",
     "build": "prisma generate --schema=prisma/schema.prisma",
-    "vercel-build": "prisma generate --schema=prisma/schema.prisma && prisma db push --schema=prisma/schema.prisma --skip-generate",
+    "vercel-build": "prisma generate --schema=prisma/schema.prisma && node -e \"if(process.env.DATABASE_URL){require('child_process').execSync('prisma db push --schema=prisma/schema.prisma --skip-generate',{stdio:'inherit'})}\"",
     "db:push": "prisma db push --schema=prisma/schema.prisma",
     "db:push:local": "prisma db push --schema=prisma/schema.local.prisma",
     "db:seed": "node prisma/seed.js",
