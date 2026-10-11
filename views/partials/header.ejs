@@ -60,6 +60,7 @@
             <a href="/my">My uploads</a>
             <% if (isMod(user)) { %><a href="/mod">Moderation</a><% } %>
             <% if (user.role === 'admin') { %><a href="/admin">Admin</a><% } %>
+            <a href="/change-password">Change password</a>
             <form action="/logout" method="post">
               <input type="hidden" name="_csrf" value="<%= csrfToken %>">
               <button type="submit">Log out</button>

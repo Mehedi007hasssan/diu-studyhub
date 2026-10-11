@@ -3,6 +3,7 @@ const bcrypt = require('bcryptjs');
 const rateLimit = require('express-rate-limit');
 const db = require('../db');
 const { isAdminEmail } = require('../lib/config');
+const { requireLogin } = require('../lib/auth');
 
 const router = express.Router();
 
@@ -121,6 +122,53 @@ router.post('/login', authLimiter, async (req, res) => {
 router.post('/logout', (req, res) => {
   req.session = null;
   res.redirect('/');
+});
+
+router.get('/change-password', requireLogin, (req, res) => {
+  res.render('change-password', { title: 'Change password', error: null, msg: null });
+});
+
+router.post('/change-password', requireLogin, async (req, res) => {
+  const currentPassword = req.body.currentPassword || '';
+  const newPassword = req.body.newPassword || '';
+  const confirmPassword = req.body.confirmPassword || '';
+
+  const user = db.prepare('SELECT id, password_hash FROM users WHERE id = ?').get(req.user.id);
+  if (!user) return res.redirect('/login');
+
+  const match = await bcrypt.compare(currentPassword, user.password_hash);
+  if (!match) {
+    return res.status(400).render('change-password', {
+      title: 'Change password',
+      error: 'Current password is incorrect.',
+      msg: null,
+    });
+  }
+
+  if (newPassword.length < 8) {
+    return res.status(400).render('change-password', {
+      title: 'Change password',
+      error: 'New password must be at least 8 characters long.',
+      msg: null,
+    });
+  }
+
+  if (newPassword !== confirmPassword) {
+    return res.status(400).render('change-password', {
+      title: 'Change password',
+      error: 'New passwords do not match.',
+      msg: null,
+    });
+  }
+
+  const hash = await bcrypt.hash(newPassword, 12);
+  db.prepare('UPDATE users SET password_hash = ? WHERE id = ?').run(hash, req.user.id);
+
+  res.render('change-password', {
+    title: 'Change password',
+    error: null,
+    msg: 'Password updated successfully!',
+  });
 });
 
 module.exports = router;

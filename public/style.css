@@ -603,3 +603,23 @@ details summary { cursor: pointer; font-weight: 600; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
 }
+
+/* Show / Hide password */
+.pw-wrap { position: relative; display: block; }
+.pw-wrap input { padding-right: 70px; }
+.pw-toggle {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: 0;
+  padding: 6px 8px;
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--muted);
+  cursor: pointer;
+  border-radius: 6px;
+}
+.pw-toggle:hover { text-decoration: underline; }
