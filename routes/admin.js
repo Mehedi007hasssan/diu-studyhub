@@ -1,6 +1,7 @@
 const express = require('express');
 const prisma = require('../db');
 const { requireAdmin } = require('../lib/auth');
+const { containsText } = require('../lib/prisma-helpers');
 
 const router = express.Router();
 router.use(requireAdmin);
@@ -41,9 +42,9 @@ router.get('/', async (req, res, next) => {
     const userWhere = {};
     if (q) {
       userWhere.OR = [
-        { name: { contains: q, mode: 'insensitive' } },
-        { email: { contains: q, mode: 'insensitive' } },
-        { studentId: { contains: q, mode: 'insensitive' } },
+        { name: containsText(q) },
+        { email: containsText(q) },
+        { studentId: containsText(q) },
       ];
     }
 

@@ -1,6 +1,7 @@
 const express = require('express');
 const prisma = require('../db');
 const { TYPES } = require('../lib/constants');
+const { containsText } = require('../lib/prisma-helpers');
 
 const router = express.Router();
 
@@ -73,8 +74,9 @@ router.get('/', async (req, res, next) => {
 
 router.get('/d/:code', async (req, res, next) => {
   try {
-    const dept = await prisma.department.findFirst({
-      where: { code: { equals: req.params.code, mode: 'insensitive' } },
+    const code = (req.params.code || '').toUpperCase();
+    const dept = await prisma.department.findUnique({
+      where: { code },
     });
     if (!dept) return res.status(404).render('error', { title: 'Not found', message: 'Department not found.' });
 
@@ -82,8 +84,8 @@ router.get('/d/:code', async (req, res, next) => {
     const where = { departmentId: dept.id };
     if (q) {
       where.OR = [
-        { code: { contains: q, mode: 'insensitive' } },
-        { title: { contains: q, mode: 'insensitive' } },
+        { code: containsText(q) },
+        { title: containsText(q) },
       ];
     }
 
@@ -202,12 +204,12 @@ router.get('/search', async (req, res, next) => {
       if (terms.length) {
         matWhere.AND = terms.map((t) => ({
           OR: [
-            { title: { contains: t, mode: 'insensitive' } },
-            { description: { contains: t, mode: 'insensitive' } },
-            { term: { contains: t, mode: 'insensitive' } },
-            { originalName: { contains: t, mode: 'insensitive' } },
-            { course: { code: { contains: t, mode: 'insensitive' } } },
-            { course: { title: { contains: t, mode: 'insensitive' } } },
+            { title: containsText(t) },
+            { description: containsText(t) },
+            { term: containsText(t) },
+            { originalName: containsText(t) },
+            { course: { code: containsText(t) } },
+            { course: { title: containsText(t) } },
           ],
         }));
       }
@@ -242,8 +244,8 @@ router.get('/search', async (req, res, next) => {
         if (deptId) courseWhere.departmentId = deptId;
         courseWhere.AND = terms.map((t) => ({
           OR: [
-            { code: { contains: t, mode: 'insensitive' } },
-            { title: { contains: t, mode: 'insensitive' } },
+            { code: containsText(t) },
+            { title: containsText(t) },
           ],
         }));
 
