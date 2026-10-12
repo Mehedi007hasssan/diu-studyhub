@@ -14,7 +14,7 @@ const {
   MAX_MB,
 } = require('../lib/upload');
 const { uploadLimiter } = require('../lib/ratelimit');
-const { LOCAL_UPLOAD_DIR } = require('../lib/storage');
+const { LOCAL_UPLOAD_DIR, getLocalFilePath } = require('../lib/storage');
 const { TYPES, EXAMS } = require('../lib/constants');
 
 const router = express.Router();
@@ -231,7 +231,8 @@ router.post(
       }
 
       // Upload buffer directly to Cloud Object Storage
-      await uploadToStorage(info.storedName, file.buffer, info.mime);
+      const storageRes = await uploadToStorage(info.storedName, file.buffer, info.mime);
+      const storedIdentifier = (storageRes && storageRes.url) ? storageRes.url : info.storedName;
 
       const mod = isMod(req.user);
       const created = await prisma.material.create({
@@ -243,18 +244,18 @@ router.post(
           exam: form.type === 'question' ? form.exam || null : null,
           term: form.term || null,
           description: form.description || null,
-          storedName: info.storedName,
+          storedName: storedIdentifier,
           originalName: file.originalname.slice(0, 200),
           mime: info.mime,
           size: file.size,
           sha256: info.sha256,
-          status: mod ? 'approved' : 'pending',
+          status: 'approved',
           reviewedBy: mod ? req.user.id : null,
-          reviewedAt: mod ? new Date() : null,
+          reviewedAt: new Date(),
         },
       });
 
-      res.redirect(mod ? '/m/' + created.id + '?new=1' : '/my?uploaded=1');
+      res.redirect('/m/' + created.id + '?new=1');
     } catch (err) {
       next(err);
     }
@@ -344,7 +345,7 @@ router.get('/m/:id/download', async (req, res, next) => {
     }
 
     // Local file fallback for offline testing
-    const localFile = path.join(LOCAL_UPLOAD_DIR, m.stored_name);
+    const localFile = getLocalFilePath(m.stored_name);
     if (!fs.existsSync(localFile)) return notFound(res, 'The file is missing from the server.');
     res.download(localFile, m.original_name);
   } catch (err) {
@@ -365,7 +366,7 @@ router.get('/m/:id/view', async (req, res, next) => {
     }
 
     // Local file fallback
-    const localFile = path.join(LOCAL_UPLOAD_DIR, m.stored_name);
+    const localFile = getLocalFilePath(m.stored_name);
     if (!fs.existsSync(localFile)) return notFound(res, 'The file is missing from the server.');
     res.setHeader('Content-Type', m.mime);
     res.setHeader('Content-Disposition', 'inline');
