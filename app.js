@@ -86,8 +86,19 @@ app.locals.fmtSize = (n) => {
 };
 app.locals.fmtDate = (s) => {
   if (!s) return '';
-  const d = new Date(s.replace(' ', 'T') + 'Z');
-  return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+  let d;
+  if (s instanceof Date) {
+    d = s;
+  } else if (typeof s === 'string') {
+    if (s.endsWith('Z') || s.includes('T')) {
+      d = new Date(s);
+    } else {
+      d = new Date(s.replace(' ', 'T') + 'Z');
+    }
+  } else {
+    d = new Date(s);
+  }
+  return isNaN(d.getTime()) ? '' : d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
 };
 
 // Route mounts
