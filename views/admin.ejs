@@ -26,7 +26,7 @@
 </form>
 <div class="table-wrap">
   <table class="table">
-    <thead><tr><th>Name</th><th>Email</th><th>Dept</th><th>Joined</th><th>Role</th><th>Actions</th></tr></thead>
+    <thead><tr><th>Name</th><th>Email</th><th>Dept</th><th>Joined</th><th>Role & Actions</th></tr></thead>
     <tbody>
       <% users.forEach(function(u){ %>
         <tr>
@@ -38,28 +38,24 @@
             <% if (u.id === user.id) { %>
               <span class="badge badge-admin">admin (you)</span>
             <% } else { %>
-              <form action="/admin/users/<%= u.id %>/role" method="post" class="role-form">
-                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                <select name="role" aria-label="Role for <%= u.name %>">
-                  <% ['student','moderator','admin'].forEach(function(r){ %><option value="<%= r %>" <%= u.role === r ? 'selected' : '' %>><%= r %></option><% }) %>
-                </select>
-                <button class="btn btn-ghost btn-sm" type="submit">Save</button>
-              </form>
-            <% } %>
-          </td>
-          <td style="white-space: nowrap;">
-            <% if (u.id !== user.id) { %>
-              <form action="/admin/users/<%= u.id %>/delete" method="post" onsubmit="return confirm('Are you sure you want to delete member <%= u.name %> (<%= u.email %>)? This action cannot be undone.');" style="display:inline-block; margin:0;">
-                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                <button class="btn btn-sm btn-danger" type="submit" title="Delete this member">Delete</button>
-              </form>
-            <% } else { %>
-              <span class="muted">-</span>
+              <div style="display: inline-flex; align-items: center; gap: 8px;">
+                <form action="/admin/users/<%= u.id %>/role" method="post" class="role-form" style="margin: 0;">
+                  <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                  <select name="role" aria-label="Role for <%= u.name %>">
+                    <% ['student','moderator','admin'].forEach(function(r){ %><option value="<%= r %>" <%= u.role === r ? 'selected' : '' %>><%= r %></option><% }) %>
+                  </select>
+                  <button class="btn btn-ghost btn-sm" type="submit">Save</button>
+                </form>
+                <form action="/admin/users/<%= u.id %>/delete" method="post" onsubmit="return confirm('Are you sure you want to permanently delete <%= u.name %> (<%= u.email %>)?');" style="margin: 0;">
+                  <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                  <button class="btn btn-sm btn-danger" type="submit" style="color: #dc2626; border-color: #fca5a5; background: #fef2f2; font-weight: 600; cursor: pointer; padding: 5px 10px;">🗑️ Delete</button>
+                </form>
+              </div>
             <% } %>
           </td>
         </tr>
       <% }) %>
-      <% if (!users.length) { %><tr><td colspan="6" class="muted">No one matches that search.</td></tr><% } %>
+      <% if (!users.length) { %><tr><td colspan="5" class="muted">No one matches that search.</td></tr><% } %>
     </tbody>
   </table>
 </div>
