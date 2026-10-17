@@ -136,7 +136,7 @@ router.post('/register', authLimiter, async (req, res, next) => {
     });
 
     // Send email
-    await sendOtpEmail({
+    const emailResult = await sendOtpEmail({
       to: form.email,
       code,
       type: 'register',
@@ -144,7 +144,11 @@ router.post('/register', authLimiter, async (req, res, next) => {
     });
 
     req.session.pendingVerifyEmail = form.email;
-    res.redirect('/verify-email?email=' + encodeURIComponent(form.email));
+    let redirectUrl = '/verify-email?email=' + encodeURIComponent(form.email);
+    if (!emailResult.ok && emailResult.error) {
+      redirectUrl += '&error=' + encodeURIComponent(emailResult.error);
+    }
+    res.redirect(redirectUrl);
   } catch (err) {
     next(err);
   }
@@ -157,7 +161,7 @@ router.get('/verify-email', (req, res) => {
   res.render('verify-otp', {
     title: 'Verify your email',
     email,
-    error: null,
+    error: req.query.error || null,
     msg: req.query.msg || null,
   });
 });
@@ -241,12 +245,17 @@ router.post('/resend-otp', authLimiter, async (req, res, next) => {
         },
       });
 
-      await sendOtpEmail({
+      const emailResult = await sendOtpEmail({
         to: email,
         code,
         type,
         name: user.name,
       });
+
+      if (!emailResult.ok && emailResult.error) {
+        const dest = type === 'reset_password' ? '/reset-password' : '/verify-email';
+        return res.redirect(`${dest}?email=${encodeURIComponent(email)}&error=${encodeURIComponent(emailResult.error)}`);
+      }
     }
 
     if (type === 'reset_password') {
@@ -322,7 +331,7 @@ router.get('/reset-password', (req, res) => {
   res.render('reset-password', {
     title: 'Set new password',
     email,
-    error: null,
+    error: req.query.error || null,
     msg: req.query.msg || null,
   });
 });
