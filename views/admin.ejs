@@ -34,7 +34,7 @@
           <td><%= u.email %></td>
           <td><%= u.dept || '-' %></td>
           <td><%= fmtDate(u.created_at) %></td>
-          <td>
+          <td style="white-space: nowrap;">
             <% if (u.id === user.id) { %>
               <span class="badge badge-admin">admin (you)</span>
             <% } else { %>
@@ -47,7 +47,7 @@
               </form>
             <% } %>
           </td>
-          <td>
+          <td style="white-space: nowrap;">
             <% if (u.id !== user.id) { %>
               <form action="/admin/users/<%= u.id %>/delete" method="post" onsubmit="return confirm('Are you sure you want to delete member <%= u.name %> (<%= u.email %>)? This action cannot be undone.');" style="display:inline-block; margin:0;">
                 <input type="hidden" name="_csrf" value="<%= csrfToken %>">
