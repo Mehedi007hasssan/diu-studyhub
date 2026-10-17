@@ -110,6 +110,70 @@ router.post('/users/:id/role', async (req, res, next) => {
   }
 });
 
+router.post('/users/:id/delete', async (req, res, next) => {
+  try {
+    const userId = parseInt(req.params.id, 10);
+
+    if (isNaN(userId)) {
+      flash(req, 'Invalid user ID.', false);
+      return res.redirect('/admin');
+    }
+
+    if (userId === req.user.id) {
+      flash(req, 'You cannot delete your own account.', false);
+      return res.redirect('/admin');
+    }
+
+    const targetUser = await prisma.user.findUnique({
+      where: { id: userId },
+      include: {
+        uploadedMaterials: {
+          select: { storedName: true },
+        },
+      },
+    });
+
+    if (!targetUser) {
+      flash(req, 'User not found.', false);
+      return res.redirect('/admin');
+    }
+
+    // Protect master admin emails
+    const { isAdminEmail } = require('../lib/config');
+    if (isAdminEmail(targetUser.email)) {
+      flash(req, 'Master admin accounts cannot be deleted.', false);
+      return res.redirect('/admin');
+    }
+
+    // Clean up uploaded files from storage
+    const { deleteFromStorage } = require('../lib/storage');
+    for (const mat of targetUser.uploadedMaterials) {
+      try {
+        await deleteFromStorage(mat.storedName);
+      } catch (err) {
+        console.error('Failed to remove material file from storage during user deletion:', err);
+      }
+    }
+
+    // Clean up verification codes for this email
+    try {
+      await prisma.verificationCode.deleteMany({
+        where: { email: targetUser.email },
+      });
+    } catch {}
+
+    // Delete user from database (cascades to uploaded materials and reports)
+    await prisma.user.delete({
+      where: { id: userId },
+    });
+
+    flash(req, `Member "${targetUser.name}" (${targetUser.email}) has been permanently deleted.`);
+    res.redirect('/admin');
+  } catch (err) {
+    next(err);
+  }
+});
+
 router.post('/departments', async (req, res, next) => {
   try {
     const code = (req.body.code || '').trim().toUpperCase().replace(/\s+/g, '');
