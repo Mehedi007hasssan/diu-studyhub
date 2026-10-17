@@ -2,13 +2,26 @@
 
 <div class="auth">
   <h1>Log in</h1>
-  <% if (error) { %><div class="notice bad"><%= error %></div><% } %>
+  <% if (typeof reset !== 'undefined' && reset) { %>
+    <div class="notice good">Your password has been reset successfully! Please log in with your new password.</div>
+  <% } %>
+  <% if (typeof verified !== 'undefined' && verified) { %>
+    <div class="notice good">Email verified successfully! You can now log in.</div>
+  <% } %>
+  <% if (error) { %>
+    <div class="notice bad"><%= error %></div>
+  <% } %>
+
   <form class="form" action="/login" method="post">
     <input type="hidden" name="_csrf" value="<%= csrfToken %>">
     <label>Email
-      <input type="email" name="email" required autocomplete="email" value="<%= email %>">
+      <input type="email" name="email" required autocomplete="email" value="<%= email || '' %>">
     </label>
-    <label>Password
+    <label>
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+        <span>Password</span>
+        <a href="/forgot-password" style="font-size: 13px; text-decoration: none;">Forgot password?</a>
+      </div>
       <input type="password" name="password" required autocomplete="current-password">
     </label>
     <button class="btn" type="submit">Log in</button>

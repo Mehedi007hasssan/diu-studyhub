@@ -41,6 +41,7 @@ model User {
   passwordHash      String      @map("password_hash")
   departmentId      Int?        @map("department_id")
   role              String      @default("student")
+  emailVerified     Boolean     @default(true) @map("email_verified")
   createdAt         DateTime    @default(now()) @map("created_at")
 
   department        Department? @relation(fields: [departmentId], references: [id], onDelete: SetNull)
@@ -97,4 +98,17 @@ model Report {
 
   @@unique([materialId, reporterId])
   @@map("reports")
+}
+
+model VerificationCode {
+  id        Int      @id @default(autoincrement())
+  email     String
+  code      String
+  type      String   // "register" or "reset_password"
+  expiresAt DateTime @map("expires_at")
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([email, type])
+  @@map("verification_codes")
 }

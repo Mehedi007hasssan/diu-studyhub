@@ -1,0 +1,49 @@
+<%- include('partials/header') %>
+
+<div class="auth">
+  <h1>Verify your email</h1>
+  <p class="muted">
+    We have sent a <strong>6-digit verification code</strong> to<br>
+    <strong style="color: var(--fg);"><%= email %></strong>
+  </p>
+
+  <% if (error) { %>
+    <div class="notice bad"><%= error %></div>
+  <% } %>
+  <% if (msg) { %>
+    <div class="notice good"><%= msg %></div>
+  <% } %>
+
+  <form class="form" action="/verify-email" method="post">
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+    <input type="hidden" name="email" value="<%= email %>">
+
+    <label>Enter 6-digit verification code
+      <input 
+        type="text" 
+        name="otp" 
+        required 
+        pattern="[0-9]{6}" 
+        maxlength="6" 
+        autofocus 
+        placeholder="123456" 
+        autocomplete="one-time-code"
+        style="font-family: monospace; font-size: 26px; letter-spacing: 8px; text-align: center; font-weight: 700; height: 56px;"
+      >
+    </label>
+
+    <button class="btn" type="submit" style="width: 100%;">Verify & Activate Account</button>
+  </form>
+
+  <div style="margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--border); text-align: center;">
+    <p class="muted" style="margin-bottom: 8px;">Didn't receive the email? Check your spam folder or request a new code:</p>
+    <form action="/resend-otp" method="post" style="display: inline-block;">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+      <input type="hidden" name="email" value="<%= email %>">
+      <input type="hidden" name="type" value="register">
+      <button class="btn ghost" type="submit" style="font-size: 13px; padding: 6px 14px;">Resend Code</button>
+    </form>
+  </div>
+</div>
+
+<%- include('partials/footer') %>
