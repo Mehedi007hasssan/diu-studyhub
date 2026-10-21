@@ -84,6 +84,10 @@
       <span class="muted" id="folder-status" style="display:block; margin-top:6px; font-size:0.88rem;">Select an entire directory from your device to automatically bundle as a .zip.</span>
     </label>
 
+    <div class="notice tip" style="margin-top: 14px; font-size: 0.88rem; background: var(--surface-2); padding: 10px 14px; border-radius: 8px; border: 1px solid var(--line);">
+      💡 <strong>Note on serverless upload limits:</strong> Vercel serverless has a 4.5 MB request payload limit. Files or folders larger than <%= MAX_MB %> MB should be compressed or split before uploading.
+    </div>
+
     <p class="muted" style="margin-top: 14px;">Only upload material you created or are allowed to share. Please don’t upload full copyrighted textbooks.</p>
   </fieldset>
 
