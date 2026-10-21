@@ -74,14 +74,22 @@
   </fieldset>
 
   <fieldset>
-    <legend>3. The file</legend>
+    <legend>3. The file/folder</legend>
     <label>Choose file (PDF, PPT/PPTX, DOC/DOCX, XLS/XLSX, PNG/JPG, ZIP · max <%= MAX_MB %> MB)
-      <input type="file" name="file" id="file" required accept=".pdf,.ppt,.pptx,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg,.zip">
+      <input type="file" name="file" id="file" accept=".pdf,.ppt,.pptx,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg,.zip">
     </label>
-    <p class="muted">Only upload material you created or are allowed to share. Please don’t upload full copyrighted textbooks.</p>
+    
+    <label style="margin-top: 14px;">Or choose a folder to upload
+      <input type="file" id="folder" webkitdirectory directory multiple>
+      <span class="muted" id="folder-status" style="display:block; margin-top:6px; font-size:0.88rem;">Select an entire directory from your device to automatically bundle as a .zip.</span>
+    </label>
+
+    <p class="muted" style="margin-top: 14px;">Only upload material you created or are allowed to share. Please don’t upload full copyrighted textbooks.</p>
   </fieldset>
 
-  <button class="btn" type="submit">Upload</button>
+  <button class="btn" id="upload-btn" type="submit">Upload</button>
 </form>
+
+<script src="/jszip.min.js"></script>
 
 <%- include('partials/footer') %>

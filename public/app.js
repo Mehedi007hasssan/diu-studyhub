@@ -76,13 +76,94 @@
   }
 
   var file = document.getElementById('file');
-  if (file) {
+  var folder = document.getElementById('folder');
+  var folderStatus = document.getElementById('folder-status');
+  var uploadBtn = document.getElementById('upload-btn');
+
+  if (file && folder) {
     var form = file.form;
     var max = parseInt(form.getAttribute('data-max-mb'), 10) || 25;
+
     file.addEventListener('change', function () {
-      if (file.files[0] && file.files[0].size > max * 1024 * 1024) {
-        window.alert('That file is larger than ' + max + ' MB. Please compress it or split it.');
-        file.value = '';
+      if (file.files[0]) {
+        if (file.files[0].size > max * 1024 * 1024) {
+          window.alert('That file is larger than ' + max + ' MB. Please compress it or split it.');
+          file.value = '';
+          return;
+        }
+        folder.value = '';
+        if (folderStatus) {
+          folderStatus.textContent = 'Select an entire directory from your device to automatically bundle as a .zip.';
+          folderStatus.style.color = '';
+        }
+      }
+    });
+
+    folder.addEventListener('change', async function () {
+      if (!folder.files || !folder.files.length) return;
+      var files = folder.files;
+      var totalBytes = 0;
+      for (var i = 0; i < files.length; i++) {
+        totalBytes += files[i].size;
+      }
+
+      if (totalBytes > max * 1024 * 1024) {
+        window.alert('The total folder size exceeds ' + max + ' MB. Please remove some files or compress it.');
+        folder.value = '';
+        return;
+      }
+
+      if (typeof JSZip === 'undefined') {
+        window.alert('Zip archiver library is still loading. Please try again in a second.');
+        return;
+      }
+
+      if (folderStatus) {
+        folderStatus.textContent = 'Bundling ' + files.length + ' file(s) into a zip... please wait.';
+        folderStatus.style.color = 'var(--primary, #0284c7)';
+      }
+      if (uploadBtn) uploadBtn.disabled = true;
+
+      try {
+        var zip = new JSZip();
+        for (var j = 0; j < files.length; j++) {
+          var f = files[j];
+          var relPath = f.webkitRelativePath || f.name;
+          zip.file(relPath, f);
+        }
+
+        var folderName = 'folder_upload';
+        if (files[0].webkitRelativePath) {
+          folderName = files[0].webkitRelativePath.split('/')[0] || folderName;
+        }
+
+        var blob = await zip.generateAsync({ type: 'blob', compression: 'DEFLATE' });
+        var zipFile = new File([blob], folderName + '.zip', { type: 'application/zip' });
+
+        var dataTransfer = new DataTransfer();
+        dataTransfer.items.add(zipFile);
+        file.files = dataTransfer.files;
+
+        if (folderStatus) {
+          folderStatus.textContent = '✓ Folder bundled: ' + folderName + '.zip (' + (blob.size / 1024 / 1024).toFixed(2) + ' MB, ' + files.length + ' files)';
+          folderStatus.style.color = 'var(--good, #16a34a)';
+        }
+      } catch (err) {
+        console.error('Error zipping folder:', err);
+        window.alert('Could not package folder into a zip. You can compress the folder to a .zip manually and upload it directly.');
+        if (folderStatus) {
+          folderStatus.textContent = 'Failed to bundle folder. Please upload a .zip file directly.';
+          folderStatus.style.color = 'var(--danger, #dc2626)';
+        }
+      } finally {
+        if (uploadBtn) uploadBtn.disabled = false;
+      }
+    });
+
+    form.addEventListener('submit', function (e) {
+      if (!file.files || !file.files[0]) {
+        e.preventDefault();
+        window.alert('Please choose a file or select a folder to upload.');
       }
     });
   }
